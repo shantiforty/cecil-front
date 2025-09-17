@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { setCookie } from 'cookies-next';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:3001';
 
@@ -12,7 +13,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  async function handleLogin() {
+    async function handleLogin() {
     setLoading(true);
     setError(null);
 
@@ -25,22 +26,34 @@ export default function LoginPage() {
 
       const data = await res.json();
 
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || 'Login failed');
+      if (!res.ok) {
+        throw new Error(data.error || 'Login failed');
       }
 
-      // Optional: Store user role
-      if (data.role) {
-        localStorage.setItem('userRole', data.role);
+      const { token, user } = data;
+      
+      // ✅ Store the token in a cookie for secure, middleware-accessible authentication
+      setCookie('auth_token', token, {
+        path: '/',
+        maxAge: 60 * 60 * 24, // 24 hours
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+      });
+      
+      // ✅ Optional: Store user role in a cookie if needed for client-side rendering
+      if (user?.Member_Status) {
+        setCookie('user_role', user.Member_Status, { path: '/' });
       }
 
-      router.push('/home');
+      router.push('/membersList');
+      
     } catch (e: any) {
       setError(e.message ?? 'Login error');
     } finally {
       setLoading(false);
     }
   }
+
 
   return (
     <main className="login-container">
