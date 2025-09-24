@@ -1,3 +1,5 @@
+// src/app/page.tsx
+
 'use client';
 
 import { useState } from 'react';
@@ -35,7 +37,7 @@ export default function LoginPage() {
       // ✅ Store the token in a cookie for secure, middleware-accessible authentication
       setCookie('auth_token', token, {
         path: '/',
-        maxAge: 60 * 60 * 24, // 24 hours
+        maxAge: 60 * 24,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
       });
@@ -45,7 +47,7 @@ export default function LoginPage() {
         setCookie('user_role', user.Member_Status, { path: '/' });
       }
 
-      router.push('/membersList');
+      router.push('/home');
       
     } catch (e: any) {
       setError(e.message ?? 'Login error');
@@ -88,3 +90,5 @@ export default function LoginPage() {
     </main>
   );
 }
+
+
